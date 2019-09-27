@@ -1,0 +1,39 @@
+{
+  "name": "eslint-plugin-loyaltylion",
+  "version": "0.0.1",
+  "description": "LoyaltyLion plugin for ESLint",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "typescript"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@typescript-eslint/experimental-utils": "^2.3.1",
+    "tsutils": "^3.17.1"
+  },
+  "devDependencies": {
+    "@types/eslint": "^6.1.1",
+    "@types/jest": "^24.0.18",
+    "@types/node": "^12.7.8",
+    "@typescript-eslint/parser": "^2.3.1",
+    "eslint": "~6.4.0",
+    "jest": "^24.9.0",
+    "prettier": "^1.18.2",
+    "source-map-support": "^0.5.13",
+    "ts-jest": "^24.1.0",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.3"
+  },
+  "license": "MIT",
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "all"
+  }
+}

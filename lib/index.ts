@@ -6,7 +6,9 @@ export = {
   },
   configs: {
     all: {
-      'loyaltylion/return-await-promise-in-try': 1,
+      rules: {
+        'loyaltylion/return-await-promise-in-try': 1,
+      },
     },
   },
 }

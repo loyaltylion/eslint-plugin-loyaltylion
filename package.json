@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-loyaltylion",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "LoyaltyLion plugin for ESLint",
   "keywords": [
     "eslint",
@@ -10,7 +10,7 @@
   ],
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "jest && tsc -p tsconfig.build.json",
     "test": "jest"
   },
   "dependencies": {

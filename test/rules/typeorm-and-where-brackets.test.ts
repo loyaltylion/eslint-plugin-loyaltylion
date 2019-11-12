@@ -10,6 +10,7 @@ manager.createQueryBuilder(User, 'users')
   .where('users.id = :id', { id: 1 })
   .andWhere('users.ref = 20')
   .getOne()
+
 manager.createQueryBuilder(User, 'users')
   .where('users.id = :id', { id: 1 })
   .andWhere(
@@ -17,31 +18,60 @@ manager.createQueryBuilder(User, 'users')
     { name: 'alice', email: 'alice@example.com' },
   )
   .getOne()
+
+const clause = "users.name = 'alice'"
+manager.createQueryBuilder(User, 'users')
+  .andWhere(clause)
+  .getOne()
+
+class Brackets {
+  constructor(fn?: any) {}
+}
+
+manager.createQueryBuilder(User, 'users')
+  .andWhere(
+    new Brackets(brackets => {
+      brackets
+        .where("users.name = 'Alice'")
+        .orWhere("users.name = 'Bob'")
+    })
+  )
+  .getOne()
+
+const bracketsExpr = new Brackets()
+
+manager.createQueryBuilder(User, 'users')
+  .andWhere(bracketsExpr)
+  .getOne()
     `,
   ],
 
   invalid: [
     {
       code: `
-manager.createQueryBuilder(User, 'users')
-  .where('users.id = :id', { id: 1 })
-  .andWhere(
-    'users.name = :name OR users.email = :email',
-    { name: 'alice', email: 'alice@example.com' },
-  )
-  .getOne()
+  manager.createQueryBuilder(User, 'users')
+    .where('users.id = :id', { id: 1 })
+    .andWhere(
+      'users.name = :name OR users.email = :email',
+      { name: 'alice', email: 'alice@example.com' },
+    )
+    .getOne()
 
-manager.createQueryBuilder(User, 'users')
-  .where('users.id = :id', { id: 1 })
-  .andWhere(\`users.name = \${name} or users.email is null\`)
-  .getOne()
+  manager.createQueryBuilder(User, 'users')
+    .where('users.id = :id', { id: 1 })
+    .andWhere(\`users.name = \${name} or users.email is null\`)
+    .getOne()
 
-const clause = "users.name = 'alice'"
-manager.createQueryBuilder(User, 'users')
-  .where('users.id = :id', { id: 1 })
-  .andWhere(clause)
-  .getOne()
-      `,
+  const clause = () => "users.name = 'alice'"
+  manager.createQueryBuilder(User, 'users')
+    .where('users.id = :id', { id: 1 })
+    .andWhere(clause())
+    .getOne()
+
+  manager.createQueryBuilder(User, 'users')
+    .andWhere({} as any)
+    .getOne()
+        `,
       errors: [
         {
           line: 2,
@@ -53,7 +83,11 @@ manager.createQueryBuilder(User, 'users')
         },
         {
           line: 16,
-          messageId: MessageId.LiteralRequired,
+          messageId: MessageId.ValidNodeRequired,
+        },
+        {
+          line: 21,
+          messageId: MessageId.ValidNodeRequired,
         },
       ],
     },

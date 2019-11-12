@@ -1,4 +1,4 @@
-import { createRule } from '../util'
+import { createRule, getParserServices } from '../util'
 import {
   MemberExpression,
   Identifier,
@@ -7,12 +7,14 @@ import {
   TemplateLiteral,
 } from '@typescript-eslint/typescript-estree/dist/ts-estree/ts-estree'
 import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils'
+import ts = require('typescript')
 
 export enum MessageId {
   BracketsRequired = 'andWhereBracketsRequired',
-  LiteralRequired = 'andWhereLiteralRequired',
+  ValidNodeRequired = 'andWhereValidNodeRequired',
 }
 
+const BRACKETS_SYMBOL = 'Brackets'
 const BRACKETED_RE = /^\s*\(.*?\)\s*$/m
 const CONTAINS_OR_RE = /\s+or\s+/im
 
@@ -26,8 +28,7 @@ export default createRule<[], MessageId>({
       recommended: 'error',
     },
     messages: {
-      [MessageId.LiteralRequired]:
-        'First argument to `andWhere` must be a string or template literal',
+      [MessageId.ValidNodeRequired]: `First argument to \`andWhere\` must be a string, template literal or ${BRACKETS_SYMBOL} type`,
       [MessageId.BracketsRequired]:
         'Strings passed to `andWhere` containing an `or` must start with `(` and end with `)`',
     },
@@ -35,6 +36,33 @@ export default createRule<[], MessageId>({
   },
   defaultOptions: [],
   create(context) {
+    const parserServices = getParserServices(context)
+    const checker = parserServices.program.getTypeChecker()
+
+    function getType(node: Expression): ts.Type {
+      return checker.getTypeAtLocation(
+        parserServices.esTreeNodeToTSNodeMap.get(node),
+      )
+    }
+
+    function isBracketsExpression(node: Expression): boolean {
+      return getType(node).getSymbol()?.name === BRACKETS_SYMBOL
+    }
+
+    function getExpressionStringValue(node: Expression): string | null {
+      if (isTemplateLiteral(node)) {
+        return node.quasis.map(x => x.value.raw).join('')
+      }
+
+      const type = getType(node)
+
+      if (type.isStringLiteral()) {
+        return type.value
+      }
+
+      return null
+    }
+
     return {
       CallExpression(node): void {
         const { callee } = node
@@ -55,16 +83,17 @@ export default createRule<[], MessageId>({
           return
         }
 
-        const value = getStringValue(node.arguments[0])
+        const firstArg = node.arguments[0]
+
+        if (isBracketsExpression(firstArg)) {
+          return
+        }
+
+        const value = getExpressionStringValue(firstArg)
 
         if (value === null) {
-          // although non-literals (e.g. clause from a variable) may be safe, we
-          // have no way to know for sure that they are. It's safer to enforce
-          // that the argument must be a string literal. This isn't much of an
-          // inconvenience as most of the time it's best to pass a literal to
-          // this function anyway
           context.report({
-            messageId: MessageId.LiteralRequired,
+            messageId: MessageId.ValidNodeRequired,
             node: callee,
           })
 
@@ -87,18 +116,6 @@ export default createRule<[], MessageId>({
     }
   },
 })
-
-function getStringValue(node: Expression): string | null {
-  if (isLiteral(node) && typeof node.value === 'string') {
-    return node.value
-  }
-
-  if (isTemplateLiteral(node)) {
-    return node.quasis.map(x => x.value.raw).join('')
-  }
-
-  return null
-}
 
 function isMemberExpression(node: Expression): node is MemberExpression {
   return node.type === AST_NODE_TYPES.MemberExpression

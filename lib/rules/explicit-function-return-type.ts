@@ -25,7 +25,7 @@ const messageId = 'missingReturnType'
  * option to allow arrow functions
  */
 export default createRule<Options, typeof messageId>({
-  name: 'return-await-promise-in-try',
+  name: 'explicit-function-return-type',
   meta: {
     ...baseRule.meta,
     schema: [

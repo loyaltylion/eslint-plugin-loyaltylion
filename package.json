@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-loyaltylion",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "LoyaltyLion plugin for ESLint",
   "repository": "loyaltylion/eslint-plugin-loyaltylion",
   "main": "dist/index.js",

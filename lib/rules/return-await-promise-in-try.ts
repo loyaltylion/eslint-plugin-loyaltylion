@@ -33,9 +33,7 @@ export default createRule<[], typeof messageId>({
 
     return {
       ReturnStatement(node): void {
-        const { expression } = parserServices.esTreeNodeToTSNodeMap.get<
-          ts.ReturnStatement
-        >(node)
+        const { expression } = parserServices.esTreeNodeToTSNodeMap.get(node)
 
         if (!expression) {
           return

@@ -55,6 +55,11 @@ const func = (name: string) => ({ name })
 const funcTwo = function() { return 1 }
 function funcThree() { return 2 }
       `,
+      options: [
+        {
+          allowArrowFunctions: false,
+        },
+      ],
       errors: [
         {
           line: 2,

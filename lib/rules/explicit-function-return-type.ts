@@ -15,6 +15,7 @@ type Options = [
      */
     allowArrowFunctions?: boolean
     allowDirectConstAssertionInArrowFunctions?: boolean
+    allowConciseArrowFunctionExpressionsStartingWithVoid?: boolean
   },
 ]
 
@@ -27,7 +28,7 @@ const messageId = 'missingReturnType'
 export default createRule<Options, typeof messageId>({
   name: 'explicit-function-return-type',
   meta: {
-    ...baseRule.meta,
+    ...(baseRule.meta as any),
     schema: [
       {
         type: 'object',
@@ -64,9 +65,31 @@ export default createRule<Options, typeof messageId>({
   create(context, [options]) {
     const rule = baseRule.create(context)
 
+    const ruleFuncDeclaration = rule.FunctionDeclaration
+    const ruleFuncExpression = rule[
+      'ArrowFunctionExpression, FunctionExpression'
+    ] as typeof rule.FunctionExpression
+
+    // because we're patching the explicit-function-return-type rule, we are
+    // liable to break here if the listeners change in that rule (it has
+    // happened before). If that happens, we'll get this error after an upgrade.
+    // check the rule source and ensure that our patch is doing what it is
+    // supposed to do (i.e. passes FuncDeclaration and FuncExpressions to the
+    // rule, and handles ArrowFuncExpressions itself)
+    //
+    // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/src/rules/explicit-function-return-type.ts
+
+    if (!ruleFuncDeclaration || !ruleFuncExpression) {
+      throw new Error(
+        '@loyaltylion/explicit-function-return-type: our patch to the underlying ' +
+          'rule is no longer going to work because we are missing one or more ' +
+          'listeners',
+      )
+    }
+
     return {
-      FunctionDeclaration: rule.FunctionDeclaration,
-      FunctionExpression: rule.FunctionExpression,
+      FunctionDeclaration: ruleFuncDeclaration,
+      FunctionExpression: ruleFuncExpression,
       ArrowFunctionExpression(node): void {
         if (
           options.allowArrowFunctions &&
@@ -75,7 +98,7 @@ export default createRule<Options, typeof messageId>({
           return
         }
 
-        rule.ArrowFunctionExpression?.(node)
+        ruleFuncExpression(node as any)
       },
     }
   },

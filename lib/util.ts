@@ -4,7 +4,7 @@ import {
   ParserServices,
 } from '@typescript-eslint/experimental-utils'
 
-export const createRule = ESLintUtils.RuleCreator(name => name)
+export const createRule = ESLintUtils.RuleCreator((name) => name)
 
 type RequiredParserServices = {
   [k in keyof ParserServices]: Exclude<ParserServices[k], undefined>

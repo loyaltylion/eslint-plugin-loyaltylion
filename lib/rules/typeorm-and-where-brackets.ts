@@ -51,7 +51,7 @@ export default createRule<[], MessageId>({
 
     function getExpressionStringValue(node: Expression): string | null {
       if (isTemplateLiteral(node)) {
-        return node.quasis.map(x => x.value.raw).join('')
+        return node.quasis.map((x) => x.value.raw).join('')
       }
 
       const type = getType(node)

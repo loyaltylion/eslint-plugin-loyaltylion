@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "lib": ["es2017"],
+    "lib": ["es2018"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noUnusedLocals": false,
@@ -11,6 +11,6 @@
     "pretty": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "es2018"
   }
 }

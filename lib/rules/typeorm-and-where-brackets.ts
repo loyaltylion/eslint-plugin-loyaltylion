@@ -1,12 +1,5 @@
 import { createRule, getParserServices } from '../util'
-import {
-  MemberExpression,
-  Identifier,
-  Expression,
-  Literal,
-  TemplateLiteral,
-} from '@typescript-eslint/typescript-estree/dist/ts-estree/ts-estree'
-import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils'
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/experimental-utils'
 import ts = require('typescript')
 
 export enum MessageId {
@@ -39,17 +32,19 @@ export default createRule<[], MessageId>({
     const parserServices = getParserServices(context)
     const checker = parserServices.program.getTypeChecker()
 
-    function getType(node: Expression): ts.Type {
+    function getType(node: TSESTree.Expression): ts.Type {
       return checker.getTypeAtLocation(
         parserServices.esTreeNodeToTSNodeMap.get(node),
       )
     }
 
-    function isBracketsExpression(node: Expression): boolean {
+    function isBracketsExpression(node: TSESTree.Expression): boolean {
       return getType(node).getSymbol()?.name === BRACKETS_SYMBOL
     }
 
-    function getExpressionStringValue(node: Expression): string | null {
+    function getExpressionStringValue(
+      node: TSESTree.Expression,
+    ): string | null {
       if (isTemplateLiteral(node)) {
         return node.quasis.map((x) => x.value.raw).join('')
       }
@@ -117,18 +112,22 @@ export default createRule<[], MessageId>({
   },
 })
 
-function isMemberExpression(node: Expression): node is MemberExpression {
+function isMemberExpression(
+  node: TSESTree.Expression,
+): node is TSESTree.MemberExpression {
   return node.type === AST_NODE_TYPES.MemberExpression
 }
 
-function isIdentifier(node: Expression): node is Identifier {
+function isIdentifier(node: TSESTree.Expression): node is TSESTree.Identifier {
   return node.type === AST_NODE_TYPES.Identifier
 }
 
-function isLiteral(node: Expression): node is Literal {
+function isLiteral(node: TSESTree.Expression): node is TSESTree.Literal {
   return node.type === AST_NODE_TYPES.Literal
 }
 
-function isTemplateLiteral(node: Expression): node is TemplateLiteral {
+function isTemplateLiteral(
+  node: TSESTree.Expression,
+): node is TSESTree.TemplateLiteral {
   return node.type === AST_NODE_TYPES.TemplateLiteral
 }
